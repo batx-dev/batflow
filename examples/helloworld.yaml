@@ -1,0 +1,4 @@
+jobs:
+  hostname:
+    image: alpine:latest
+    command: [hostname]
