@@ -3,7 +3,6 @@ package batflow
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"path"
 	"strings"
 
@@ -31,7 +30,7 @@ type Container struct {
 
 // Image container image name.
 type Image struct {
-	URI url.URL `json:"uri"`
+	URI string `json:"uri"`
 }
 
 // Resource compute resources required by container.
@@ -47,6 +46,10 @@ type Resource struct {
 
 type SlurmApptainerActivities struct {
 	sshClient *ssh.Client
+}
+
+func NewSlurmApptainerActivites(client *ssh.Client) *SlurmApptainerActivities {
+	return &SlurmApptainerActivities{sshClient: client}
 }
 
 // Start a named instance of the given container image
@@ -81,7 +84,7 @@ func buildSlurmJobSubmitCommand(container *Container) string {
 
 		# Generate job script.
 		cat <<- 'SCRIPT' > job.sh || exit $?
-			#/usr/bin/env bash
+			#!/usr/bin/env bash
 			` + buildSlurmJobOptions(container) + `
 
 			[[ -f ~/.batflow/env ]] && source ~/.batflow/env || true
@@ -115,7 +118,7 @@ func buildSlurmJobStepCommand(container *Container) string {
 	if _, ok := container.Resource.Devices[DeviceNvidiaGPUKey]; ok {
 		command = append(command, "--nv")
 	}
-	command = append(command, container.Image.URI.String())
+	command = append(command, container.Image.URI)
 	command = append(command, container.Command...)
 	return strings.Join(command, " ")
 }

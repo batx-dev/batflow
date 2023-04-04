@@ -17,11 +17,23 @@ func main() {
 	defer c.Close()
 
 	workflowOptions := client.StartWorkflowOptions{
-		ID:        "hello_world_workflowID",
-		TaskQueue: "hello-world",
+		TaskQueue: "batflow",
 	}
 
-	we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, batflow.Workflow, "Temporal")
+	we, err := c.ExecuteWorkflow(context.Background(), workflowOptions, batflow.StartContainerWorkflow,
+		&batflow.Container{
+			Image: batflow.Image{
+				URI: "docker://jupyter/minimal-notebook",
+			},
+			Command: []string{"jupyter", "notebook", "--port", "8888", "--no-browser"},
+			Ports:   []uint16{8888},
+			Resource: batflow.Resource{
+				Devices: map[string]uint{
+					batflow.DeviceNvidiaGPUKey: 1,
+				},
+			},
+		},
+	)
 	if err != nil {
 		log.Fatalln("Unable to execute workflow", err)
 	}
@@ -29,10 +41,8 @@ func main() {
 	log.Println("Started workflow", "WorkflowID", we.GetID(), "RunID", we.GetRunID())
 
 	// Synchronously wait for the workflow completion.
-	var result string
-	err = we.Get(context.Background(), &result)
+	err = we.Get(context.Background(), nil)
 	if err != nil {
 		log.Fatalln("Unable get workflow result", err)
 	}
-	log.Println("Workflow result:", result)
 }

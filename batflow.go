@@ -1,37 +1,28 @@
 package batflow
 
 import (
-	"context"
 	"time"
 
-	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/workflow"
 )
 
-// Workflow is a Hello World workflow definition.
-func Workflow(ctx workflow.Context, name string) (string, error) {
+func StartContainerWorkflow(ctx workflow.Context, container *Container) error {
 	ao := workflow.ActivityOptions{
-		StartToCloseTimeout: 10 * time.Second,
+		StartToCloseTimeout: time.Minute,
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
 	logger := workflow.GetLogger(ctx)
-	logger.Info("HelloWorld workflow started", "name", name)
+	logger.Info("Container workflow started", "name", container.Name)
 
-	var result string
-	err := workflow.ExecuteActivity(ctx, Activity, name).Get(ctx, &result)
+	var a *SlurmApptainerActivities
+	err := workflow.ExecuteActivity(ctx, a.Start, container).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
-		return "", err
+		return err
 	}
 
-	logger.Info("HelloWorld workflow completed.", "result", result)
+	logger.Info("Start container workflow completed.")
 
-	return result, nil
-}
-
-func Activity(ctx context.Context, name string) (string, error) {
-	logger := activity.GetLogger(ctx)
-	logger.Info("Activity", "name", name)
-	return "Hello " + name + "!", nil
+	return nil
 }
