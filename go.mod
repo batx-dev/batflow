@@ -2,7 +2,11 @@ module github.com/batx-dev/batflow
 
 go 1.20
 
-require go.temporal.io/sdk v1.21.1
+require (
+	go.temporal.io/sdk v1.21.1
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	k8s.io/apimachinery v0.26.3
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -21,9 +25,9 @@ require (
 	github.com/stretchr/testify v1.8.1 // indirect
 	go.temporal.io/api v1.16.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20230127162408-596548ed4efa // indirect
 	google.golang.org/grpc v1.52.3 // indirect
