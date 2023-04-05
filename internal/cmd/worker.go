@@ -1,9 +1,8 @@
-package main
+package cmd
 
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/batx-dev/batflow"
@@ -13,8 +12,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func main() {
-	app := &cli.App{
+func getWorkerCommand() *cli.Command {
+	cmd := &cli.Command{
 		Name:  "worker",
 		Usage: "Start batflow worker",
 		Flags: []cli.Flag{
@@ -38,14 +37,13 @@ func main() {
 				EnvVars: []string{"BATFLOW_SSH_KEYFILE"},
 			},
 		},
-		Action: run,
+		Action: runWorker,
 	}
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
-	}
+	return cmd
+
 }
 
-func run(ctx *cli.Context) error {
+func runWorker(ctx *cli.Context) error {
 	flag.Parse()
 
 	// Dial to ssh server.

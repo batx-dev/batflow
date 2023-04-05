@@ -13,7 +13,7 @@ starter:
 
 .PHONY: worker
 worker:
-	go run ./worker/... 
+	go run ./cmd/batflow/... worker 
 
 .PHONY: server
 server:
