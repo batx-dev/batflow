@@ -5,11 +5,7 @@ endif
 
 .PHONE: all
 all:
-	@echo "make server, worker, or starter"
-
-.PHONY: starter
-starter:
-	go run ./starter/...
+	@echo "make server, worker, or apiserver"
 
 .PHONY: apiserver
 apiserver:
