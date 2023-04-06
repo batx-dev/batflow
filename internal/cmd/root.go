@@ -11,6 +11,7 @@ func GetRootCommand() *cli.App {
 
 	app.Commands = []*cli.Command{
 		getWorkerCommand(),
+		getAPIServerCommand(),
 	}
 
 	return app

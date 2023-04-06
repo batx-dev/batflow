@@ -11,6 +11,10 @@ all:
 starter:
 	go run ./starter/...
 
+.PHONY: apiserver
+apiserver:
+	go run ./cmd/batflow/... apiserver 
+
 .PHONY: worker
 worker:
 	go run ./cmd/batflow/... worker 

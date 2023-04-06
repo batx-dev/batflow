@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -44,8 +43,6 @@ func getWorkerCommand() *cli.Command {
 }
 
 func runWorker(ctx *cli.Context) error {
-	flag.Parse()
-
 	// Dial to ssh server.
 	sshConfig := &ssh.ClientConfig{
 		User:            ctx.String("ssh-username"),
