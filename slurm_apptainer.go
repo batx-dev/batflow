@@ -113,7 +113,8 @@ func buildSlurmJobStepCommand(container *Container) string {
 	command := []string{
 		"apptainer",
 		"exec",
-		"--writable-tmpfs",
+		"--compat",
+		"--fakeroot",
 	}
 	if _, ok := container.Resource.Devices[DeviceNvidiaGPUKey]; ok {
 		command = append(command, "--nv")
