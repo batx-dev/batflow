@@ -13,7 +13,7 @@ func StartContainerWorkflow(ctx workflow.Context, container *Container) error {
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
 	logger := workflow.GetLogger(ctx)
-	logger.Info("Container workflow started", "name", container.Name)
+	logger.Info("Container workflow started", "name", container.ID)
 
 	var a *SlurmApptainerActivities
 	err := workflow.ExecuteActivity(ctx, a.Start, container).Get(ctx, nil)

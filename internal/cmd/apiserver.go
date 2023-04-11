@@ -119,12 +119,12 @@ func (r *ContainerResource) startContainer(req *restful.Request, res *restful.Re
 		WriteServiceError(res, http.StatusInternalServerError, fmt.Errorf("read request body: %v", err))
 		return
 	}
-	if container.Name == "" {
-		container.Name = rand.String(16)
+	if container.ID == "" {
+		container.ID = rand.String(16)
 	}
 
 	_, err := r.temporalClient.ExecuteWorkflow(req.Request.Context(), client.StartWorkflowOptions{
-		ID:        container.Name,
+		ID:        container.ID,
 		TaskQueue: "batflow",
 	},
 		batflow.StartContainerWorkflow,
@@ -161,7 +161,7 @@ func (r *ContainerResource) listWorkflows(ctx context.Context) ([]*workflowpb.Wo
 func presentContainer(we *workflowpb.WorkflowExecutionInfo) *batflow.Container {
 	c := new(batflow.Container)
 
-	c.Name = we.Execution.WorkflowId
+	c.ID = we.Execution.WorkflowId
 	c.Status = we.Status.String()
 
 	return c

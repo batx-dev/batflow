@@ -15,9 +15,9 @@ const (
 )
 
 type Container struct {
-	// Name of the container specified as a DNS_LABEL. Each Container must
+	// ID of the container specified as a DNS_LABEL. Each Container must
 	// have a unique name.
-	Name string `json:"name"`
+	ID string `json:"id"`
 	// Image container image name.
 	Image Image `json:"image"`
 	// Command to execute.
@@ -75,10 +75,10 @@ func (a *SlurmApptainerActivities) List(ctx context.Context, names []string) (er
 }
 
 func buildSlurmJobSubmitCommand(container *Container) string {
-	if container.Name == "" {
-		container.Name = rand.String(16)
+	if container.ID == "" {
+		container.ID = rand.String(16)
 	}
-	workDir := path.Join("~/.batflow/jobs", container.Name)
+	workDir := path.Join("~/.batflow/jobs", container.ID)
 
 	return `sh <<- 'CMD'
 		mkdir -p ` + workDir + ` || exit $?
@@ -100,7 +100,7 @@ func buildSlurmJobSubmitCommand(container *Container) string {
 
 func buildSlurmJobOptions(container *Container) string {
 	opts := []string{
-		fmt.Sprintf("--job-name=%q", container.Name),
+		fmt.Sprintf("--job-name=%q", container.ID),
 	}
 	if count, ok := container.Resource.Devices[DeviceNvidiaGPUKey]; ok {
 		opts = append(opts, fmt.Sprintf("--gpus=%d", count))
