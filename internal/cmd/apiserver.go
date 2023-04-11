@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -8,6 +9,8 @@ import (
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	restful "github.com/emicklei/go-restful/v3"
 	"github.com/urfave/cli/v2"
+	workflowpb "go.temporal.io/api/workflow/v1"
+	"go.temporal.io/api/workflowservice/v1"
 	"go.temporal.io/sdk/client"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
@@ -95,6 +98,19 @@ func WriteServiceError(res *restful.Response, httpStatus int, err error) {
 }
 
 func (r *ContainerResource) listContainers(req *restful.Request, res *restful.Response) {
+	wfs, err := r.listWorkflows(req.Request.Context())
+	if err != nil {
+		WriteServiceError(res, http.StatusInternalServerError, fmt.Errorf("list containers: %v", err))
+		return
+	}
+
+	containers := make([]*batflow.Container, len(wfs))
+	for i, wf := range wfs {
+		c := presentContainer(wf)
+		containers[i] = c
+	}
+
+	res.WriteEntity(containers)
 }
 
 func (r *ContainerResource) startContainer(req *restful.Request, res *restful.Response) {
@@ -108,6 +124,7 @@ func (r *ContainerResource) startContainer(req *restful.Request, res *restful.Re
 	}
 
 	_, err := r.temporalClient.ExecuteWorkflow(req.Request.Context(), client.StartWorkflowOptions{
+		ID:        container.Name,
 		TaskQueue: "batflow",
 	},
 		batflow.StartContainerWorkflow,
@@ -118,4 +135,34 @@ func (r *ContainerResource) startContainer(req *restful.Request, res *restful.Re
 		return
 	}
 	res.WriteHeaderAndEntity(http.StatusCreated, container)
+}
+
+func (r *ContainerResource) listWorkflows(ctx context.Context) ([]*workflowpb.WorkflowExecutionInfo, error) {
+	var executions []*workflowpb.WorkflowExecutionInfo
+	var nextPageToken []byte
+
+	for {
+		resp, err := r.temporalClient.ListWorkflow(ctx, &workflowservice.ListWorkflowExecutionsRequest{
+			PageSize:      10,
+			NextPageToken: nextPageToken,
+		})
+		if err != nil {
+			return executions, err
+		}
+
+		executions = append(executions, resp.Executions...)
+		if len(resp.NextPageToken) == 0 {
+			return executions, nil
+		}
+		nextPageToken = resp.NextPageToken
+	}
+}
+
+func presentContainer(we *workflowpb.WorkflowExecutionInfo) *batflow.Container {
+	c := new(batflow.Container)
+
+	c.Name = we.Execution.WorkflowId
+	c.Status = we.Status.String()
+
+	return c
 }

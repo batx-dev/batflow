@@ -26,6 +26,8 @@ type Container struct {
 	Ports []uint16 `json:"ports"`
 	// Resources compute resources required by container.
 	Resource Resource `json:"resource"`
+
+	Status string `json:"status"`
 }
 
 // Image container image name.
